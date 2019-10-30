@@ -10,7 +10,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define CHANNEL 4
+#define CHANNEL 1
 
 
 int main()
