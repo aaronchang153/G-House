@@ -1,7 +1,7 @@
 #include "btserver.h"
 
 
-BtServer::BtServer() : ready(false)
+BtServer::BtServer() : ready(false), server_thread(NULL)
 {
     if((server_sock = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0)
     {
@@ -25,7 +25,6 @@ BtServer::BtServer() : ready(false)
     }
 
     running = false;
-    server_thread = NULL;
     ready = true;
 }
 
