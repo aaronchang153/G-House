@@ -58,7 +58,7 @@ void BtServer::join()
 {
     if(server_thread != NULL)
     {
-        (*server_thread).join();
+        server_thread->join();
         delete server_thread;
         server_thread = NULL;
     }
@@ -82,6 +82,7 @@ void BtServer::run()
 
         if(poll_set[0].revents & POLLIN)
         {
+            //If there's data to be read on the server socket
             sock = accept(server_sock, (struct sockaddr *)&addr, &alen);
 
             char buffer[] = "Test string from Pi.";
