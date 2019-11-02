@@ -1,7 +1,7 @@
 #include "btserver.h"
 
 
-BtServer::BtServer()
+BtServer::BtServer() : ready(false)
 {
     if((server_sock = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0)
     {
@@ -24,10 +24,9 @@ BtServer::BtServer()
         return;
     }
 
-    listen(server_sock, BT_QUEUE);
-
     running = false;
     server_thread = NULL;
+    ready = true;
 }
 
 BtServer::~BtServer()
@@ -40,6 +39,11 @@ BtServer::~BtServer()
 
 void BtServer::start()
 {
+    if(!ready)
+    {
+        fprintf(stderr, "Warning: Attempting to start server without a valid socket. No action taken.\n");
+        return;
+    }
     if(server_thread == NULL)
     {
         server_thread = new std::thread(&BtServer::run, this);
@@ -68,6 +72,8 @@ void BtServer::run()
     struct pollfd poll_set[BT_POLL_NFDS];
     poll_set[0].fd = server_sock;
     poll_set[0].events = POLLIN;
+
+    listen(server_sock, BT_QUEUE);
 
     running = true;
     while(running)

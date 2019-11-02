@@ -28,7 +28,7 @@ private:
     int server_sock;
     int sock;
     struct sockaddr_rc addr;
-    bool running;
+    bool ready, running;
     std::thread *server_thread;
 public:
     BtServer();
