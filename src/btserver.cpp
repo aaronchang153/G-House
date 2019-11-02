@@ -1,28 +1,12 @@
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-
-#include <bluetooth/bluetooth.h>
-#include <bluetooth/rfcomm.h>
-
-#include <stdio.h>
-#include <string.h>
-#include <unistd.h>
-
-#define CHANNEL 1
+#include "btserver.h"
 
 
-int main()
+BtServer::BtServer()
 {
-    int sock, client;
-    socklen_t alen;
-    struct sockaddr_rc addr;
-
-    if((sock = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0)
+    if((server_sock = socket(AF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0)
     {
         printf("Error creating socket.\n");
-        return 1;
+        return;
     }
 
     // BDADDR_ANY is defined as (&(bdaddr_t) {{0, 0, 0, 0, 0, 0}})
@@ -31,25 +15,76 @@ int main()
 
     addr.rc_family = AF_BLUETOOTH;
     bacpy(&addr.rc_bdaddr, &tmp);
-    addr.rc_channel = htobs(CHANNEL);
-    alen = sizeof(addr);
+    addr.rc_channel = htobs(BT_CHANNEL);
+    socklen_t alen = sizeof(addr);
 
-    if(bind(sock, (struct sockaddr *)&addr, alen) < 0)
+    if(bind(server_sock, (struct sockaddr *)&addr, alen) < 0)
     {
         printf("Error binding socket.\n");
-        return 1;
+        return;
     }
 
-    listen(sock, 1);
-    printf("Waiting for connection...\n");
-    client = accept(sock, (struct sockaddr *)&addr, &alen);
+    listen(server_sock, BT_QUEUE);
 
-    char buffer[] = "Test string from Pi.";
+    running = false;
+    server_thread = NULL;
+}
 
-    send(client, buffer, strlen(buffer), 0);
+BtServer::~BtServer()
+{
+    if(server_thread != NULL)
+    {
+        delete server_thread;
+    }
+}
 
-    close(client);
-    close(sock);
+void BtServer::start()
+{
+    if(server_thread == NULL)
+    {
+        server_thread = new std::thread(&BtServer::run, this);
+    }
+}
 
-    return 0;
+void BtServer::stop()
+{
+    running = false;
+}
+
+void BtServer::join()
+{
+    if(server_thread != NULL)
+    {
+        (*server_thread).join();
+        delete server_thread;
+        server_thread = NULL;
+    }
+}
+
+void BtServer::run()
+{
+    socklen_t alen = sizeof(addr);
+
+    struct pollfd poll_set[BT_POLL_NFDS];
+    poll_set[0].fd = server_sock;
+    poll_set[0].events = POLLIN;
+
+    running = true;
+    while(running)
+    {
+        //poll sockets in poll_set every 1000 ms
+        poll(poll_set, BT_POLL_NFDS, 1000);
+
+        if(poll_set[0].revents & POLLIN)
+        {
+            sock = accept(server_sock, (struct sockaddr *)&addr, &alen);
+
+            char buffer[] = "Test string from Pi.";
+
+            send(sock, buffer, strlen(buffer), 0);
+
+            close(sock);
+        }
+    }
+    close(server_sock);
 }
