@@ -8,10 +8,7 @@ namespace pinout
     namespace adafruit_feather
     {
         static const int BAUD_RATE = 9600;
-        static const int TX_PIN = 15;
-        static const int RX_PIN = 16;
-        static const int TX_LEN = 1;
-        static const int RX_LEN = 8;
+        static const unsigned char REQUEST_SIG = 0;
     };
 };
 

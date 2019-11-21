@@ -27,8 +27,8 @@ Sensor::SensorData Sensor::getData()
         return data;
     }
 
-	printf("Sending request byte to Adafruit Feather\n");
-    serialPutchar(serial_fd, 0);
+    printf("Sending request byte to Adafruit Feather\n");
+    serialPutchar(serial_fd, pinout::adafruit_feather::REQUEST_SIG);
 
     // May not actually work because of endianness
     // (Also it's probably not the most efficient solution)
@@ -37,14 +37,10 @@ Sensor::SensorData Sensor::getData()
     printf("Waiting for response from Adafruit Feather\n");
     while(idx < sizeof(SensorData))
     {
-        while(serialDataAvail(serial_fd))
-		{
-			data_p[idx++] = (char) serialGetchar(serial_fd);
-			if(idx > sizeof(SensorData))
-			{
-				break;
-			}
-		}
+        while(serialDataAvail(serial_fd) && idx < sizeof(SensorData))
+        {
+            data_p[idx++] = (char) serialGetchar(serial_fd);
+        }
     }
     printf("Sensor data received\n");
 
