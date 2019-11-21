@@ -3,7 +3,7 @@
 
 namespace pinout
 {
-    static const char SERIAL_DEV[] = "/dev/ttyS0";
+    static const char SERIAL_DEV[] = "/dev/ttyUSB0";
 
     namespace adafruit_feather
     {
