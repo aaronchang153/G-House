@@ -27,20 +27,26 @@ Sensor::SensorData Sensor::getData()
         return data;
     }
 
+	printf("Sending request byte to Adafruit Feather\n");
     serialPutchar(serial_fd, 0);
 
     // May not actually work because of endianness
     // (Also it's probably not the most efficient solution)
     char *data_p = (char *)&data;
     unsigned int idx = 0;
+    printf("Waiting for response from Adafruit Feather\n");
     while(idx < sizeof(SensorData))
     {
-        if((data_p[idx] = (char) serialGetchar(serial_fd)) != -1)
-        {
-            // If a character is successfully read from the device
-            idx++;
-        }
+        while(serialDataAvail(serial_fd))
+		{
+			data_p[idx++] = (char) serialGetchar(serial_fd);
+			if(idx > sizeof(SensorData))
+			{
+				break;
+			}
+		}
     }
+    printf("Sensor data received\n");
 
     return data;
 }
