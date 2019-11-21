@@ -4,7 +4,7 @@
 
 int main()
 {
-	wiringPiSetup();
+    wiringPiSetup();
     Sensor sensor;
     Sensor::SensorData data;
     data = sensor.getData();
