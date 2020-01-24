@@ -30,8 +30,6 @@ Sensor::SensorData Sensor::getData()
     printf("Sending request byte to Adafruit Feather\n");
     serialPutchar(serial_fd, pinout::adafruit_feather::REQUEST_SIG);
 
-    // May not actually work because of endianness
-    // (Also it's probably not the most efficient solution)
     char *data_p = (char *)&data;
     unsigned int idx = 0;
     printf("Waiting for response from Adafruit Feather\n");
