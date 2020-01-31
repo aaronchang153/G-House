@@ -13,6 +13,9 @@ btserverUnitTest: btserver.o btserverUnitTest.o | $(BIN_DIR)
 sensorUnitTest: sensor.o sensorUnitTest.o | $(BIN_DIR)
 	$(CC) $(LFLAGS) -o $(BIN_DIR)/$@ $(addprefix $(OBJ_DIR)/, $^)
 
+periphUnitTest: periph.o periphUnitTest.o | $(BIN_DIR)
+	$(CC) $(LFLAGS) -o $(BIN_DIR)/$@ $(addprefix $(OBJ_DIR)/, $^)
+
 %.o: %.cpp | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -o $(OBJ_DIR)/$@ $<
 
