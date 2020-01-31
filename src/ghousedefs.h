@@ -1,6 +1,8 @@
 #ifndef _GHOUSEDEFS_H_
 #define _GHOUSEDEFS_H_
 
+static const char DATA_LOG_FILE[] = "data.log";
+
 namespace pinout
 {
     static const char SERIAL_DEV[] = "/dev/ttyUSB0";
