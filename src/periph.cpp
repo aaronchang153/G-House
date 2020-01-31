@@ -4,6 +4,7 @@ Periph::Periph(int pin)
 {
     this->pin = pin;
     pinMode(this->pin, OUTPUT);
+    digitalWrite(this->pin, LOW);
 }
 
 Periph::~Periph()
