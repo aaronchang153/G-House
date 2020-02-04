@@ -8,8 +8,17 @@
 #include <ctime>
 
 
-void *datacollectThread(void *args);
-void *actuationThread(void *args);
+struct datacollectArgs
+{
+	Periph *led;
+	Periph *ph_up;
+	Periph *ph_down;
+	Periph *nutrition;
+	Sensor *sensor;
+};
+
+void *datacollectThread(void *argp);
+void toggle(Periph *p, int duration);
 
 int main()
 {
@@ -26,21 +35,31 @@ int main()
 	
 	btServer.start(); // starts on its own thread
 
+	//TODO: Create thread for datacollect
+
 	btServer.join();
 
 	return 0;
 }
 
-void *datacollectThread(void *args)
+void *datacollectThread(void *argp)
 {
-	Sensor *sensor = (Sensor *) args;
+	struct datacollectArgs *args = (struct datacollectArgs *) argp;
 	Sensor::SensorData data;
 
 	while(1)
 	{
-		data = sensor->getData();
+		data = args->sensor->getData();
+
 		//This log needs to go under a mutex
 		log_data(time(NULL), data.pH, data.EC, data.temperature);
+
+		if(data.pH < PH_THRESH_LOW)
+			toggle(args->ph_up, 1);
+		if(data.pH > PH_THRESH_HIGH)
+			toggle(args->ph_down, 1);
+		if(data.EC > EC_THRESH_LOW)
+			toggle(args->nutrition, 1);
 
 		delay(DATA_SAMPLE_TIME_MS);
 	}
@@ -48,4 +67,9 @@ void *datacollectThread(void *args)
 	return NULL;
 }
 
-void *actuationThread(void *args);
+void toggle(Periph *p, int duration)
+{
+	p->output(HIGH);
+	delay(duration);
+	p->output(LOW);
+}
