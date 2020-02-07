@@ -1,5 +1,7 @@
 #include "btserver.h"
 
+extern std::mutex logfile_mutex;
+
 
 BtServer::BtServer() : ready(false), server_thread(NULL)
 {
@@ -84,13 +86,43 @@ void BtServer::run()
         {
             //If there's data to be read on the server socket
             sock = accept(server_sock, (struct sockaddr *)&addr, &alen);
-
-            char buffer[] = "Test string from Pi.";
-
-            send(sock, buffer, strlen(buffer), 0);
-
+            send_file();
             close(sock);
         }
     }
     close(server_sock);
+}
+
+void BtServer::send_file()
+{
+    FILE *fp = NULL;
+
+    //Hold mutex the whole time we're using the file
+    logfile_mutex.lock();
+
+    fp = fopen(DATA_LOG_FILE, "rb");
+    if(fp == NULL)
+    {
+        printf("Error: BtSever could not open log file for reading.\n");
+    }
+    else
+    {
+        unsigned int size, amt_read;
+        unsigned char buffer[FILE_BUFFER_SIZE];
+        //Get file size
+        fseek(fp, 0L, SEEK_END);
+        size = ftell(fp);
+        rewind(fp);
+        //Send file size
+        send(sock, (void *)&size, sizeof(int), 0);
+        //Send file
+        while((amt_read = fread(buffer, 1, FILE_BUFFER_SIZE, fp)) > 0)
+        {
+            send(sock, buffer, amt_read, 0);
+        }
+    }
+    fclose(fp);
+    fp = NULL; //Just to be safe
+
+    logfile_mutex.unlock();
 }
