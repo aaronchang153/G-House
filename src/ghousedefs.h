@@ -23,7 +23,7 @@ namespace pinout
 
     namespace led
     {
-        static const int PIN = 26; // placeholder
+        static const int PIN = 26;
         static const int ON = 1;
         static const int OFF = 0;
     };
@@ -32,19 +32,19 @@ namespace pinout
     {
         namespace ph_up
         {
-            static const int PIN = 21; // placeholder
+            static const int PIN = 21;
             static const int ON = 1;
             static const int OFF = 0;
         };
         namespace ph_down
         {
-            static const int PIN = 22; // placeholder
+            static const int PIN = 22;
             static const int ON = 1;
             static const int OFF = 0;
         };
         namespace nutrition
         {
-            static const int PIN = 23; // placeholder
+            static const int PIN = 23;
             static const int ON = 1;
             static const int OFF = 0;
         };
