@@ -7,6 +7,9 @@ BIN_DIR=bin
 
 VPATH=src/:test/
 
+ghouse: btserver.o log.o main.o periph.o sensor.o | $(BIN_DIR)
+	$(CC) $(LFLAGS) -o $(BIN_DIR)/$@ $(addprefix $(OBJ_DIR)/, $^)
+
 btserverUnitTest: btserver.o btserverUnitTest.o | $(BIN_DIR)
 	$(CC) $(LFLAGS) -o $(BIN_DIR)/$@ $(addprefix $(OBJ_DIR)/, $^)
 
