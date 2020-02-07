@@ -1,5 +1,7 @@
 #include "btserver.h"
 
+//Just because BtServer expects there to be an extern mutex
+std::mutex logfile_mutex;
 
 int main()
 {
