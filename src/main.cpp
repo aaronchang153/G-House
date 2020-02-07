@@ -6,19 +6,14 @@
 
 #include <wiringPi.h>
 #include <ctime>
+#include <thread>
+#include <mutex>
 
 
-struct datacollectArgs
-{
-	Periph *led;
-	Periph *ph_up;
-	Periph *ph_down;
-	Periph *nutrition;
-	Sensor *sensor;
-};
+std::mutex logfile_mutex;
 
-void *datacollectThread(void *argp);
-void toggle(Periph *p, int duration);
+void datacollect(Sensor &sensor, Periph &led, Periph &ph_up, Periph &ph_down, Periph &nutrition);
+void toggle(Periph p, int duration);
 
 int main()
 {
@@ -35,41 +30,44 @@ int main()
 	
 	btServer.start(); // starts on its own thread
 
-	//TODO: Create thread for datacollect
+    std::thread datacollectThread([&]()
+    {
+        datacollect(sensor, led, ph_up, ph_down, nutrition);
+    });
 
 	btServer.join();
+	datacollectThread.join();
 
 	return 0;
 }
 
-void *datacollectThread(void *argp)
+void datacollect(Sensor &sensor, Periph &led, Periph &ph_up, Periph &ph_down, Periph &nutrition)
 {
-	struct datacollectArgs *args = (struct datacollectArgs *) argp;
 	Sensor::SensorData data;
 
 	while(1)
 	{
-		data = args->sensor->getData();
+		data = sensor.getData();
 
 		//This log needs to go under a mutex
+		logfile_mutex.lock();
 		log_data(time(NULL), data.pH, data.EC, data.temperature);
+		logfile_mutex.unlock();
 
 		if(data.pH < PH_THRESH_LOW)
-			toggle(args->ph_up, 1);
+			toggle(ph_up, 1);
 		if(data.pH > PH_THRESH_HIGH)
-			toggle(args->ph_down, 1);
+			toggle(ph_down, 1);
 		if(data.EC > EC_THRESH_LOW)
-			toggle(args->nutrition, 1);
+			toggle(nutrition, 1);
 
 		delay(DATA_SAMPLE_TIME_MS);
 	}
-
-	return NULL;
 }
 
-void toggle(Periph *p, int duration)
+void toggle(Periph p, int duration)
 {
-	p->output(HIGH);
+	p.output(HIGH);
 	delay(duration);
-	p->output(LOW);
+	p.output(LOW);
 }
