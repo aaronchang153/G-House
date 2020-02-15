@@ -12,8 +12,15 @@
 
 std::mutex logfile_mutex;
 
+static float PH_THRESH_LOW       = 5.8;
+static float PH_THRESH_HIGH      = 6.3;
+static float EC_THRESH_LOW       = 600.0;
+//static float EC_THRESH_HIGH      = 1000.0;
+static int   DATA_SAMPLE_TIME_MS = 60000;
+
 void datacollect(Sensor &sensor, Periph &led, Periph &ph_up, Periph &ph_down, Periph &nutrition);
-void toggle(Periph p, int duration);
+void actuate(Sensor::SensorData data, Periph &led, Periph &ph_up, Periph &ph_down, Periph &nutrition);
+void toggle(Periph &p, int duration);
 
 int main()
 {
@@ -30,10 +37,10 @@ int main()
 	
 	btServer.start(); // starts on its own thread
 
-    std::thread datacollectThread([&]()
-    {
-        datacollect(sensor, led, ph_up, ph_down, nutrition);
-    });
+	std::thread datacollectThread([&]()
+	{
+		datacollect(sensor, led, ph_up, ph_down, nutrition);
+	});
 
 	btServer.join();
 	datacollectThread.join();
@@ -54,18 +61,23 @@ void datacollect(Sensor &sensor, Periph &led, Periph &ph_up, Periph &ph_down, Pe
 		log_data(time(NULL), data.pH, data.EC, data.temperature);
 		logfile_mutex.unlock();
 
-		if(data.pH < PH_THRESH_LOW)
-			toggle(ph_up, 1);
-		if(data.pH > PH_THRESH_HIGH)
-			toggle(ph_down, 1);
-		if(data.EC > EC_THRESH_LOW)
-			toggle(nutrition, 1);
+		actuate(data, led, ph_up, ph_down, nutrition);
 
 		delay(DATA_SAMPLE_TIME_MS);
 	}
 }
 
-void toggle(Periph p, int duration)
+void actuate(Sensor::SensorData data, Periph &led, Periph &ph_up, Periph &ph_down, Periph &nutrition)
+{
+	if(data.pH < PH_THRESH_LOW)
+		toggle(ph_up, 1000);
+	if(data.pH > PH_THRESH_HIGH)
+		toggle(ph_down, 1000);
+	if(data.EC < EC_THRESH_LOW)
+		toggle(nutrition, 1000);
+}
+
+void toggle(Periph &p, int duration)
 {
 	p.output(HIGH);
 	delay(duration);
