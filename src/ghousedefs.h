@@ -3,14 +3,6 @@
 
 static const char DATA_LOG_FILE[] = "data.log";
 
-static const float PH_THRESH_LOW = 5.8;
-static const float PH_THRESH_HIGH = 6.3;
-
-static const float EC_THRESH_LOW = 600.0;
-static const float EC_THRESH_HIGH = 1000.0;
-
-static const int DATA_SAMPLE_TIME_MS = 60000;
-
 namespace pinout
 {
     static const char SERIAL_DEV[] = "/dev/ttyUSB0";
