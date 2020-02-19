@@ -6,11 +6,17 @@ static const char DATA_LOG_FILE[] = "data.log";
 namespace pinout
 {
     static const char SERIAL_DEV[] = "/dev/ttyUSB0";
+    static const char UART_DEV[] = "/dev/ttyS0";
 
     namespace adafruit_feather
     {
         static const int BAUD_RATE = 9600;
         static const unsigned char REQUEST_SIG = 0;
+    };
+
+    namespace co2
+    {
+        static const int BAUD_RATE = 9600;
     };
 
     namespace led

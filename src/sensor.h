@@ -4,6 +4,7 @@
 #include "ghousedefs.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <wiringPi.h>
@@ -12,13 +13,16 @@
 class Sensor
 {
 private:
-    int serial_fd;
+    int usb_fd;
+    int uart_fd;
+    const float co2_multiplier = 10.0;
 public:
     typedef struct
     {
         float pH;
         float EC;
         float temperature;
+        float CO2;
     } SensorData;
 
     Sensor();
