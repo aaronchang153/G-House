@@ -62,7 +62,7 @@ Sensor::SensorData Sensor::getData()
 
     for(int i = 0; i < 10; i++)
     {
-        if((string_buffer[i] = (char)serialGetChar(uart_fd)) == -1)
+        if((string_buffer[i] = (char)serialGetchar(uart_fd)) == -1)
         {
             //on error, zero out buffer
             memset(string_buffer, 0, 10 * sizeof(char));
