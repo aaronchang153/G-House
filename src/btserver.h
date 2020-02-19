@@ -16,10 +16,15 @@
 
 #include <cstdlib>
 #include <thread>
+#include <mutex>
+
+#include "ghousedefs.h"
 
 #define BT_CHANNEL   1
 #define BT_QUEUE     1
 #define BT_POLL_NFDS 1
+
+#define FILE_BUFFER_SIZE 1024
 
 
 class BtServer
@@ -38,6 +43,7 @@ public:
     void join();
 protected:
     void run();
+    void send_file();
 };
 
 #endif //_BTSERVER_H_
