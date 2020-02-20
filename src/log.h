@@ -6,6 +6,6 @@
 #include <unistd.h>
 #include "ghousedefs.h"
 
-void log_data(time_t t, float pH, float EC, float temp);
+void log_data(time_t t, float pH, float EC, float temp, float co2);
 
 #endif //_LOG_H_

@@ -42,9 +42,9 @@ Sensor::SensorData Sensor::getData()
     char *data_p = (char *)&data;
     unsigned int idx = 0;
     printf("Waiting for response from Adafruit Feather\n");
-    while(idx < sizeof(SensorData))
+    while(idx < 3 * sizeof(float))
     {
-        while(serialDataAvail(usb_fd) && idx < sizeof(SensorData))
+        while(serialDataAvail(usb_fd))
         {
             data_p[idx++] = (char) serialGetchar(usb_fd);
         }
@@ -60,17 +60,26 @@ Sensor::SensorData Sensor::getData()
 
     serialFlush(uart_fd);
 
-    for(int i = 0; i < 10; i++)
-    {
-        if((string_buffer[i] = (char)serialGetchar(uart_fd)) == -1)
-        {
-            //on error, zero out buffer
-            memset(string_buffer, 0, 10 * sizeof(char));
-        }
-    }
+	//Takes about 3 readings on average to get good data
+	for(int i = 0; i < 3; i++)
+	{
+		strcpy(string_buffer, "Z\r\n");
+		serialPuts(uart_fd, string_buffer);
+
+		for(int i = 0; i < 10; i++)
+		{
+			if((string_buffer[i] = (char)serialGetchar(uart_fd)) == -1)
+			{
+				//on error, zero out buffer
+				memset(string_buffer, 0, 10 * sizeof(char));
+				break;
+			}
+		}
+		delay(1000);
+	}
 
     strncpy(co2_str, string_buffer+2, 6);
-    data.CO2 = (float) atof(co2_str);
+    data.CO2 = (float) atof(co2_str) * co2_multiplier;
 
     printf("Sensor data received\n");
 

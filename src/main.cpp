@@ -6,8 +6,11 @@
 
 #include <wiringPi.h>
 #include <ctime>
+#include <csignal>
 #include <thread>
 #include <mutex>
+
+#include <signal.h>
 
 
 std::mutex logfile_mutex;
@@ -22,9 +25,27 @@ void datacollect(Sensor &sensor, Periph &led, Periph &ph_up, Periph &ph_down, Pe
 void actuate(Sensor::SensorData data, Periph &led, Periph &ph_up, Periph &ph_down, Periph &nutrition);
 void toggle(Periph &p, int duration);
 
+BtServer btServer;
+
+bool running;
+
+void signal_handler(int signum)
+{
+	digitalWrite(pinout::led::PIN, LOW);
+	digitalWrite(pinout::pump::ph_up::PIN, LOW);
+	digitalWrite(pinout::pump::ph_down::PIN, LOW);
+	digitalWrite(pinout::pump::nutrition::PIN, LOW);
+
+	exit(signum);
+}
+
 int main()
 {
 	wiringPiSetup();
+
+	signal(SIGINT, signal_handler);
+
+	running = true;
 
 	Sensor sensor;
 
@@ -33,7 +54,7 @@ int main()
 	Periph ph_down(pinout::pump::ph_down::PIN);
 	Periph nutrition(pinout::pump::nutrition::PIN);
 
-	BtServer btServer;
+	led.output(HIGH);
 	
 	btServer.start(); // starts on its own thread
 
@@ -45,6 +66,11 @@ int main()
 	btServer.join();
 	datacollectThread.join();
 
+	led.output(LOW);
+	ph_up.output(LOW);
+	ph_down.output(LOW);
+	nutrition.output(LOW);
+
 	return 0;
 }
 
@@ -52,13 +78,13 @@ void datacollect(Sensor &sensor, Periph &led, Periph &ph_up, Periph &ph_down, Pe
 {
 	Sensor::SensorData data;
 
-	while(1)
+	while(running)
 	{
 		data = sensor.getData();
 
 		//This log needs to go under a mutex
 		logfile_mutex.lock();
-		log_data(time(NULL), data.pH, data.EC, data.temperature);
+		log_data(time(NULL), data.pH, data.EC, data.temperature, data.CO2);
 		logfile_mutex.unlock();
 
 		actuate(data, led, ph_up, ph_down, nutrition);
