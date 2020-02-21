@@ -68,6 +68,7 @@ void BtServer::join()
 
 void BtServer::run()
 {
+    unsigned char cmd;
     socklen_t alen = sizeof(addr);
 
     struct pollfd poll_set[BT_POLL_NFDS];
@@ -86,7 +87,11 @@ void BtServer::run()
         {
             //If there's data to be read on the server socket
             sock = accept(server_sock, (struct sockaddr *)&addr, &alen);
+            printf("BtServer: Connection established\n");
+            recv(sock, &cmd, 1, 0);
             send_file();
+            recv(sock, &cmd, 1, 0);
+            printf("BtServer: Log file sent. Closing connection\n");
             close(sock);
         }
     }
