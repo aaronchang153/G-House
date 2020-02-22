@@ -26,6 +26,10 @@
 
 #define FILE_BUFFER_SIZE 1024
 
+#define SEND_LOG     0
+#define SEND_PARAM   1
+#define UPDATE_PARAM 2
+
 
 class BtServer
 {
@@ -44,6 +48,8 @@ public:
 protected:
     void run();
     void send_file();
+    void send_param();
+    void update_param();
 };
 
 #endif //_BTSERVER_H_

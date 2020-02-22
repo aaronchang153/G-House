@@ -2,6 +2,11 @@
 
 extern std::mutex logfile_mutex;
 
+extern float PH_THRESH_LOW;
+extern float PH_THRESH_HIGH;
+extern float EC_THRESH_LOW;
+//extern float EC_THRESH_HIGH;
+
 
 BtServer::BtServer() : ready(false), server_thread(NULL)
 {
@@ -89,9 +94,20 @@ void BtServer::run()
             sock = accept(server_sock, (struct sockaddr *)&addr, &alen);
             printf("BtServer: Connection established\n");
             recv(sock, &cmd, 1, 0);
-            send_file();
-            recv(sock, &cmd, 1, 0);
-            printf("BtServer: Log file sent. Closing connection\n");
+            switch(cmd)
+            {
+                case SEND_LOG:
+                    send_file();
+                    break;
+                case SEND_PARAM:
+                    send_param();
+                    break;
+                case UPDATE_PARAM:
+                    update_param();
+                    break;
+                default:
+                    printf("Warning: Invalid command reveived from bt client.\n");
+            }
             close(sock);
         }
     }
@@ -130,4 +146,42 @@ void BtServer::send_file()
     fp = NULL; //Just to be safe
 
     logfile_mutex.unlock();
+
+    char tmp;
+    recv(sock, &tmp, 1, 0); //wait for client to say it's finished
+    printf("BtServer: Log file sent.\n");
+}
+
+void BtServer::send_param()
+{
+    //send parameters as csv to avoid problems with endianness
+    int len;
+    char buffer[64];
+    sprintf(buffer, "%.2f,%.2f,%.2f", PH_THRESH_LOW, PH_THRESH_HIGH, EC_THRESH_LOW);
+    len = strlen(buffer);
+    send(sock, (void *)&len, sizeof(int), 0);
+    send(sock, buffer, strlen(buffer), 0);
+
+    recv(sock, buffer, 1, 0); //wait for client to say it's finished
+    printf("BtServer: Parameters sent.\n");
+}
+
+void BtServer::update_param()
+{
+    //recv parameters as csv to avoid problems with endianness
+    int len;
+    char buffer[64];
+    recv(sock, (void *)&len, sizeof(int), 0);
+    recv(sock, buffer, len, 0);
+
+    char *tok;
+    tok = strtok(buffer, ",");
+    PH_THRESH_LOW = (float)atof(tok);
+    tok = strtok(NULL, ",");
+    PH_THRESH_HIGH = (float)atof(tok);
+    tok = strtok(NULL, ",");
+    EC_THRESH_LOW = (float)atof(tok);
+
+    send(sock, buffer, 1, 0); //tell client all the data has been received
+    printf("BtServer: Updated parameters.\n");
 }
