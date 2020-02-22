@@ -68,11 +68,12 @@ Sensor::SensorData Sensor::getData()
 
 		for(int i = 0; i < 10; i++)
 		{
-			if((string_buffer[i] = (char)serialGetchar(uart_fd)) == -1)
+			if((string_buffer[i] = (char)serialGetchar(uart_fd)) == 0xFF)
 			{
-				//on error, zero out buffer
-				memset(string_buffer, 0, 10 * sizeof(char));
-				break;
+			    //serialGetchar() times out after 10 seconds
+			    printf("Warning: Could not get CO2 reading.\n");
+			    data.CO2 = 0.0;
+			    return data;
 			}
 		}
 		delay(1000);
