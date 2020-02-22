@@ -15,10 +15,11 @@
 
 std::mutex logfile_mutex;
 
-static float PH_THRESH_LOW       = 5.8;
-static float PH_THRESH_HIGH      = 6.3;
-static float EC_THRESH_LOW       = 600.0;
-//static float EC_THRESH_HIGH      = 1000.0;
+float PH_THRESH_LOW       = 5.8;
+float PH_THRESH_HIGH      = 6.3;
+float EC_THRESH_LOW       = 600.0;
+//float EC_THRESH_HIGH      = 1000.0;
+
 static int   DATA_SAMPLE_TIME_MS = 60000;
 
 void datacollect(Sensor &sensor, Periph &led, Periph &ph_up, Periph &ph_down, Periph &nutrition);
