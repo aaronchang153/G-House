@@ -1,7 +1,11 @@
 #include "btserver.h"
 
-//Just because BtServer expects there to be an extern mutex
+//BtServer expects some extern definitions
 std::mutex logfile_mutex;
+
+float PH_THRESH_LOW       = 5.8;
+float PH_THRESH_HIGH      = 6.3;
+float EC_THRESH_LOW       = 600.0;
 
 int main()
 {
