@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <mutex>
+
 #include <wiringPi.h>
 #include <wiringSerial.h>
 

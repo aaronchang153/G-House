@@ -1,5 +1,8 @@
 #include "sensor.h"
 
+std::mutex sensor_mutex;
+
+
 Sensor::Sensor()
 {
     if((usb_fd = serialOpen(pinout::SERIAL_DEV, pinout::adafruit_feather::BAUD_RATE)) < 0)
@@ -34,6 +37,8 @@ Sensor::SensorData Sensor::getData()
         memset((void *)&data, 0, sizeof(SensorData));
         return data;
     }
+
+    sensor_mutex.lock();
 
     //Get pH, EC, temperature readings
     printf("Sending request byte to Adafruit Feather\n");
@@ -83,6 +88,8 @@ Sensor::SensorData Sensor::getData()
     data.CO2 = (float) atof(co2_str) * co2_multiplier;
 
     printf("Sensor data received\n");
+
+    sensor_mutex.unlock();
 
     return data;
 }
