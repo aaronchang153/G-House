@@ -105,6 +105,9 @@ void BtServer::run()
                 case UPDATE_PARAM:
                     update_param();
                     break;
+                case SENSOR_DATA:
+                    send_sensor_data();
+                    break;
                 default:
                     printf("Warning: Invalid command reveived from bt client.\n");
             }
@@ -184,4 +187,18 @@ void BtServer::update_param()
 
     send(sock, buffer, 1, 0); //tell client all the data has been received
     printf("BtServer: Updated parameters.\n");
+}
+
+void BtServer::send_sensor_data()
+{
+    Sensor sensor;
+    Sensor::SensorData data = sensor.getData();
+    char buffer[64];
+    sprintf(buffer, "%.2f,%.2f,%.2f,%.2f", data.pH, data.EC, data.temperature, data.CO2);
+    int len = strlen(buffer);
+    send(sock, (void *)&len, sizeof(int), 0);
+    send(sock, buffer, strlen(buffer), 0);
+
+    recv(sock, buffer, 1, 0); //wait for client to say it's finished
+    printf("BtServer: Sensor data sent.\n");
 }

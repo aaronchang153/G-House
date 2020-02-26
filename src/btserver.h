@@ -19,6 +19,7 @@
 #include <mutex>
 
 #include "ghousedefs.h"
+#include "sensor.h"
 
 #define BT_CHANNEL   1
 #define BT_QUEUE     1
@@ -29,6 +30,7 @@
 #define SEND_LOG     0
 #define SEND_PARAM   1
 #define UPDATE_PARAM 2
+#define SENSOR_DATA  3
 
 
 class BtServer
@@ -50,6 +52,7 @@ protected:
     void send_file();
     void send_param();
     void update_param();
+    void send_sensor_data();
 };
 
 #endif //_BTSERVER_H_
